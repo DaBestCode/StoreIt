@@ -4,12 +4,13 @@ import { createAdminClient } from "../appwrite";
 import { ID, Query } from "node-appwrite";
 import { avatarPlaceholderUrl } from "@/constants";
 import { parseStringify } from "../utils";
-
+import { cookies } from "next/headers";
+import { appwriteConfig } from "../appwrite/config";
 const getUserByEmail = async (email: string) => {
   const { databases } = await createAdminClient();
   const results = await databases.listDocuments(
-    process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-    process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID!,
+    appwriteConfig.databaseId,
+    appwriteConfig.usersCollectionId,
     [Query.equal("email", [email])]
   );
   return results.total > 0 ? results.documents[0] : null;
@@ -20,7 +21,7 @@ const handleError = (error: any, message: string) => {
   throw error;
 };
 
-const sendEmailOTP = async ({ email }: { email: string }) => {
+export const sendEmailOTP = async ({ email }: { email: string }) => {
   const { account } = await createAdminClient();
   try {
     const session = await account.createEmailToken(ID.unique(), email);
@@ -45,8 +46,8 @@ export const createAccount = async ({
   if (!exisitingUser) {
     const { databases } = await createAdminClient();
     await databases.createDocument(
-      process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-      process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID!,
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
       ID.unique(),
       {
         fullName,
@@ -57,4 +58,26 @@ export const createAccount = async ({
     );
   }
   return parseStringify({ accountId });
+};
+
+export const verifySecret = async ({
+  accountId,
+  password,
+}: {
+  accountId: string;
+  password: string;
+}) => {
+  try {
+    const { account } = await createAdminClient();
+    const session = await account.createSession(accountId, password);
+    (await cookies()).set("appwrite-session", session.secret, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+    });
+    return parseStringify({ sessionId: session.$id });
+  } catch (error) {
+    handleError(error, "OTP verification failed");
+  }
 };
