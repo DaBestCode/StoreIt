@@ -6,6 +6,8 @@ import { avatarPlaceholderUrl } from "@/constants";
 import { parseStringify } from "../utils";
 import { cookies } from "next/headers";
 import { appwriteConfig } from "../appwrite/config";
+import { redirect } from "next/navigation";
+import { error } from "console";
 const getUserByEmail = async (email: string) => {
   const { databases } = await createAdminClient();
   const results = await databases.listDocuments(
@@ -97,4 +99,29 @@ export const getCurrentUser = async () => {
     return null;
   }
   return parseStringify(user.documents[0]);
+};
+
+export const signOut = async () => {
+  const { account } = await createSessionClient();
+  try {
+    await account.deleteSession("current");
+    (await cookies()).delete("appwrite-session");
+  } catch (error) {
+    handleError(error, "Failed to sign out");
+  } finally {
+    redirect("/sign-in");
+  }
+};
+
+export const signInUser = async ({ email }: { email: string }) => {
+  try {
+    const exisitingUser = await getUserByEmail(email);
+    if (exisitingUser) {
+      await sendEmailOTP({ email });
+      return parseStringify({ accountId: exisitingUser.accountId });
+    }
+    return parseStringify({ accountId: null, error: "User does not exist" });
+  } catch (error) {
+    handleError(error, "Failed to sign in user");
+  }
 };

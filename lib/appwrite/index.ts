@@ -2,6 +2,7 @@
 import { Account, Client, Avatars, Databases, Storage } from "node-appwrite";
 import { appwriteConfig } from "./config";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export const createSessionClient = async () => {
   const client = new Client()
@@ -10,7 +11,9 @@ export const createSessionClient = async () => {
 
   const session = (await cookies()).get("appwrite-session");
 
-  if (!session || !session.value) throw new Error("No valid session found");
+  if (!session || !session.value) {
+    redirect("/sign-in");
+  }
 
   client.setSession(session.value);
 

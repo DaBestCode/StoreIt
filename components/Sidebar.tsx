@@ -5,7 +5,6 @@ import Link from "next/link";
 import { navItems } from "@/constants";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
-import avatar from "@/public/assets/images/avatar.png";
 const Sidebar = ({
   fullName,
   avatar,

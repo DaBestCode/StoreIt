@@ -3,13 +3,25 @@ import { Button } from "./ui/button";
 import Image from "next/image";
 import FileUploader from "./FileUploader";
 import Search from "./Search";
-const Header = () => {
+import { signOut } from "@/lib/actions/user.actions";
+const Header = ({
+  userId,
+  accountId,
+}: {
+  userId: string;
+  accountId: string;
+}) => {
   return (
     <header className="header">
       <Search />
       <div className="header-wrapper">
-        <FileUploader />
-        <form>
+        <FileUploader ownerId={userId} accountId={accountId} />
+        <form
+          action={async () => {
+            "use server";
+            await signOut();
+          }}
+        >
           <Button type="submit" className="sign-out-button">
             <Image
               src="/assets/icons/logout.svg"
