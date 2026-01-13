@@ -6,6 +6,10 @@
     <img src="https://img.shields.io/badge/-Appwrite-black?style=for-the-badge&logoColor=white&logo=appwrite&color=FD366E" alt="appwrite" />
   </div>
 
+<p align="center">
+  <img src="public/assets/images/readme-screenshot.png" alt="StoreIt dashboard" style="max-width:100%;height:auto;" />
+</p>
+
   <h3 align="center">Storage and File Sharing Platform</h3>
 </div>
 
